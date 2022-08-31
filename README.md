@@ -1,4 +1,4 @@
-# Hardhat Template [![Github Actions][gha-badge]][gha] [![Hardhat][hardhat-badge]][hardhat]
+# Socket V2 Verifier [![Github Actions][gha-badge]][gha] [![Hardhat][hardhat-badge]][hardhat]
 
 [gha]: https://github.com/SocketDotTech/socket-v2-verifier-contracts/actions
 [gha-badge]: https://github.com/SocketDotTech/socket-v2-verifier-contracts/actions/workflows/ci.yml/badge.svg
@@ -6,6 +6,10 @@
 [hardhat-badge]: https://img.shields.io/badge/Built%20with-Hardhat-FFDB1C.svg
 [license]: https://opensource.org/licenses/MIT
 [license-badge]: https://img.shields.io/badge/License-MIT-blue.svg
+
+The Socket V2 Verifier contract allows consumers of the Socket API to validate onchain that their call data will have the effects they expect.
+
+This guards against a compromise of API servers causing users to sign malicious transactions coming from the API.
 
 ## Usage
 

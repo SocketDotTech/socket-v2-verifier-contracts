@@ -1,6 +1,6 @@
 {
   "name": "@socket.tech/socket-v2-verifier-contracts",
-  "description": "Hardhat-based template for developing Solidity smart contracts",
+  "description": "Verifier contracts for Socket V2 call data",
   "version": "1.0.0",
   "author": {
     "name": "rugamoto",
@@ -59,6 +59,7 @@
     "/contracts"
   ],
   "keywords": [
+    "socket",
     "blockchain",
     "ethers",
     "ethereum",
