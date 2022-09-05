@@ -71,6 +71,11 @@ contract SocketV2Verifier {
         this.verifyMiddlewareRequest(userRequest.middlewareRequest, expected.middlewareRequest);
     }
 
+    /// @notice Verify the approval call data
+    /// @param data Approval call data
+    /// @param registryAddress The address of the socket registry
+    /// @param routeId The expected route id
+    /// @param expectedAmount The expected amount
     function verifyApprovalData(
         bytes calldata data,
         address registryAddress,
