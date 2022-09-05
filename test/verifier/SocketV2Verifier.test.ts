@@ -9,8 +9,8 @@ import {
   deployVerifierFixture,
   deployVerifierWithMockedRegistryFixture,
 } from "./SocketV2Verifier.fixture";
-import { validApprovalTests } from "./approvalTestData";
-import { validCallDataTests } from "./callDataTestDatra";
+import { invalidApprovalTests, validApprovalTests } from "./approvalTestData";
+import { invalidCallDataTests, validCallDataTests } from "./callDataTestDatra";
 
 describe("Unit tests", function () {
   before(async function () {
@@ -20,7 +20,7 @@ describe("Unit tests", function () {
     this.signers.admin = signers[0];
   });
 
-  describe("SocketV2Verifier verify calldata", function () {
+  describe("SocketV2Verifier calldata succeeds", function () {
     validCallDataTests.forEach(test =>
       it(`verify call ${test.description} succeeds`, async () => {
         const { verifier } = await loadFixture(deployVerifierFixture);
@@ -30,7 +30,17 @@ describe("Unit tests", function () {
     );
   });
 
-  describe("SocketV2Verifier verify approve", function () {
+  describe("SocketV2Verifier calldata fails", function () {
+    invalidCallDataTests.forEach(test =>
+      it(`verify call ${test.description} fails`, async () => {
+        const { verifier } = await loadFixture(deployVerifierFixture);
+
+        await expect(verifier.verifyCallData(test.data, test.expected)).to.be.revertedWith(test.error);
+      }),
+    );
+  });
+
+  describe("SocketV2Verifier approve succeeds", function () {
     validApprovalTests.forEach(test =>
       it(`verify approval ${test.description} succeeds`, async () => {
         const { verifier, socketRegistry } = await loadFixture(deployVerifierWithMockedRegistryFixture);
@@ -38,6 +48,20 @@ describe("Unit tests", function () {
         socketRegistry.routes.returns([test.route]);
         expect(await verifier.verifyApprovalData(test.data, SOCKET_REGISTRY_ADDRESS, 0, test.expectedAmount)).to.not
           .throw;
+      }),
+    );
+  });
+
+  describe("SocketV2Verifier approve fails", function () {
+    invalidApprovalTests.forEach(test =>
+      it(`verify approve ${test.description} fails`, async () => {
+        const { verifier, socketRegistry } = await loadFixture(deployVerifierWithMockedRegistryFixture);
+
+        socketRegistry.routes.returns([test.route]);
+
+        await expect(
+          verifier.verifyApprovalData(test.data, SOCKET_REGISTRY_ADDRESS, 0, test.expectedAmount),
+        ).to.be.revertedWith(test.error);
       }),
     );
   });
