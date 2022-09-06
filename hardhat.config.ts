@@ -3,6 +3,7 @@ import { config as dotenvConfig } from "dotenv";
 import type { HardhatUserConfig } from "hardhat/config";
 import type { NetworkUserConfig } from "hardhat/types";
 import { resolve } from "path";
+import "xdeployer";
 
 import "./tasks/accounts";
 import "./tasks/deploy";
@@ -97,6 +98,14 @@ const config: HardhatUserConfig = {
       chainId: chainIds.hardhat,
     },
     ...liveNetworks,
+  },
+  xdeploy: {
+    contract: "SocketV2Verifier",
+    salt: "997780a8bb225dfe670e0503b056ee70bc97b1b59c85d1c53fdcebe28bfd706b",
+    signer: process.env.PRIVATE_KEY,
+    networks: ["goerli"],
+    rpcUrls: ["https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"],
+    gasLimit: 1.2 * 10 ** 6,
   },
   paths: {
     artifacts: "./artifacts",
