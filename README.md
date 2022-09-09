@@ -77,12 +77,22 @@ Delete the smart contract artifacts, the coverage reports and the Hardhat cache:
 $ yarn clean
 ```
 
-### Deploy
+### Deploy locally
 
 Deploy the contracts to Hardhat Network:
 
 ```sh
 $ yarn deploy"
+```
+
+### Deploy production
+
+To deploy to production. First load a private key with enough funds for deployment. You can see the required networks in the [config](./hardhat.config.ts) `xdeploy.networks` section.
+
+Then run with your private key:
+
+```sh
+$ PRIVATE_KEY="0xprivatekey" yarn deploy:prod
 ```
 
 ## Production
