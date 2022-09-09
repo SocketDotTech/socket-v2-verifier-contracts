@@ -6,10 +6,62 @@ import "./interfaces/ISocketRegistry.sol";
 import "./helpers/errors.sol";
 
 contract SocketV2Verifier {
-    /// @notice Verify the calldata to V2 with a given expected UserRequest
+    /// @param id route id of middleware to be used
+    /// @param optionalNativeAmount is the amount of native asset that the route requires
+    /// @param inputToken token address which will be swapped to BridgeRequest inputToken
+    /// @param data to be used by middleware
+    struct MinMiddlewareRequest {
+        uint256 id;
+        uint256 optionalNativeAmount;
+        address inputToken;
+    }
+
+    /// @param id route id of bridge to be used
+    /// @param optionalNativeAmount optinal native amount, to be used when bridge needs native token along with ERC20
+    /// @param inputToken token addresss which will be bridged
+    struct MinBridgeRequest {
+        uint256 id;
+        uint256 optionalNativeAmount;
+        address inputToken;
+    }
+
+    /// @notice The expected parameters
+    /// @param target The target expected - should be socket registry
+    /// @param receiverAddress Recipient address to recieve funds on destination chain
+    /// @param toChainId Destination ChainId
+    /// @param amount amount to be swapped if middlewareId is 0  it will be
+    /// the amount to be bridged
+    /// @param middlewareRequest middleware Requestdata
+    /// @param bridgeRequest bridge request data
+    struct ExpectedRequest {
+        address target;
+        address receiverAddress;
+        uint256 toChainId;
+        uint256 amount;
+        MinMiddlewareRequest middlewareRequest;
+        MinBridgeRequest bridgeRequest;
+    }
+
+    /// @notice The expected approval parameters
+    /// @param target The target expected - should be the tocket being approved
+    /// @param routeId The expected route id
+    /// @param amount The expected amount
+    struct ExpectedApproval {
+        address target;
+        uint256 routeId;
+        uint256 amount;
+    }
+
+    /// @notice Verify the calldata to V2 with a given expected request
+    /// @param target The address where the call data will be sent
     /// @param data Socket V2 call data
-    /// @param expected Middleware request that is expected
-    function verifyCallData(bytes calldata data, ISocketRegistry.UserRequest calldata expected) public view {
+    /// @param expected User equest that is expected
+    function verifyCallData(
+        address target,
+        bytes calldata data,
+        ExpectedRequest calldata expected
+    ) public view {
+        require(target == expected.target, CallDataVerifyErrors.INVALID_TARGET);
         ISocketRegistry.UserRequest memory userRequest = decodeCallData(data);
         require(userRequest.toChainId == expected.toChainId, CallDataVerifyErrors.INVALID_TO_CHAIN_ID);
         require(userRequest.receiverAddress == expected.receiverAddress, CallDataVerifyErrors.INVALID_RECEIVER_ADDRESS);
@@ -19,55 +71,56 @@ contract SocketV2Verifier {
     }
 
     /// @notice Verify the approval call data
+    /// @param target The address where the approval will be sent. This should be the input token.
     /// @param data Approval call data
     /// @param registryAddress The address of the socket registry
-    /// @param routeId The expected route id
-    /// @param expectedAmount The expected amount
+    /// @param expected Approval parameters that are expected
     function verifyApprovalData(
+        address target,
         bytes calldata data,
         address registryAddress,
-        uint256 routeId,
-        uint256 expectedAmount
+        ExpectedApproval calldata expected
     ) public view {
+        require(target == expected.target, ApprovalVerifyErrors.INVALID_TARGET);
         (address spender, uint256 amount) = decodeApprovalData(data);
-        ISocketRegistry.RouteData memory route = ISocketRegistry(registryAddress).routes()[routeId];
-        require(route.isEnabled, ApprovalVerifyErrors.INVALID_ROUTE);
-        require(route.route == spender, ApprovalVerifyErrors.INVALID_SPENDER);
-        require(amount == expectedAmount, ApprovalVerifyErrors.INVALID_AMOUNT);
+        ISocketRegistry.RouteData memory expectedRoute = ISocketRegistry(registryAddress).routes()[expected.routeId];
+        require(expectedRoute.isEnabled, ApprovalVerifyErrors.INVALID_ROUTE);
+        require(spender == expectedRoute.route, ApprovalVerifyErrors.INVALID_SPENDER);
+        require(amount == expected.amount, ApprovalVerifyErrors.INVALID_AMOUNT);
     }
 
     /// @notice Verify the bridge request
     /// @param request Bridge request
-    /// @param expectedRequest Bridge request that is expected
-    function verifyBridgeRequest(
-        ISocketRegistry.BridgeRequest calldata request,
-        ISocketRegistry.BridgeRequest calldata expectedRequest
-    ) public pure {
-        require(request.id == expectedRequest.id, CallDataVerifyErrors.INVALID_BRIDGE_ID);
+    /// @param expected Bridge request that is expected
+    function verifyBridgeRequest(ISocketRegistry.BridgeRequest calldata request, MinBridgeRequest calldata expected)
+        public
+        pure
+    {
+        require(request.id == expected.id, CallDataVerifyErrors.INVALID_BRIDGE_ID);
         require(
-            request.optionalNativeAmount == expectedRequest.optionalNativeAmount,
+            request.optionalNativeAmount == expected.optionalNativeAmount,
             CallDataVerifyErrors.INVALID_BRIDGE_AMOUNT
         );
-        require(request.inputToken == expectedRequest.inputToken, CallDataVerifyErrors.INVALID_BRIDGE_TOKEN);
+        require(request.inputToken == expected.inputToken, CallDataVerifyErrors.INVALID_BRIDGE_TOKEN);
     }
 
     /// @notice Verify the middleware request if it is specified
     /// @param request Middleware request
-    /// @param expectedRequest Middleware request that is expected
+    /// @param expected Middleware request that is expected
     function verifyMiddlewareRequest(
         ISocketRegistry.MiddlewareRequest calldata request,
-        ISocketRegistry.MiddlewareRequest calldata expectedRequest
+        MinMiddlewareRequest calldata expected
     ) public pure {
         if (request.id == 0) {
             // If middleware request ID is 0, middleware verification is not required
             return;
         }
-        require(request.id == expectedRequest.id, CallDataVerifyErrors.INVALID_MIDDLEWARE_ID);
+        require(request.id == expected.id, CallDataVerifyErrors.INVALID_MIDDLEWARE_ID);
         require(
-            request.optionalNativeAmount == expectedRequest.optionalNativeAmount,
+            request.optionalNativeAmount == expected.optionalNativeAmount,
             CallDataVerifyErrors.INVALID_MIDDLEWARE_AMOUNT
         );
-        require(request.inputToken == expectedRequest.inputToken, CallDataVerifyErrors.INVALID_MIDDLEWARE_TOKEN);
+        require(request.inputToken == expected.inputToken, CallDataVerifyErrors.INVALID_MIDDLEWARE_TOKEN);
     }
 
     /// @notice Decode the socket v2 calldata

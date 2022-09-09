@@ -2,6 +2,7 @@
 pragma solidity >=0.8.4;
 
 library CallDataVerifyErrors {
+    string internal constant INVALID_TARGET = "INVALID_TARGET";
     string internal constant INVALID_TO_CHAIN_ID = "INVALID_TO_CHAIN_ID";
     string internal constant INVALID_RECEIVER_ADDRESS = "INVALID_RECEIVER_ADDRESS";
     string internal constant INVALID_AMOUNT = "INVALID_AMOUNT";
@@ -16,6 +17,7 @@ library CallDataVerifyErrors {
 }
 
 library ApprovalVerifyErrors {
+    string internal constant INVALID_TARGET = "INVALID_TARGET";
     string internal constant INVALID_ROUTE = "INVALID_ROUTE";
     string internal constant INVALID_SPENDER = "INVALID_SPENDER";
     string internal constant INVALID_AMOUNT = "INVALID_AMOUNT";

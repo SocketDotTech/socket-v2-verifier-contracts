@@ -25,7 +25,7 @@ describe("Unit tests", function () {
       it(`verify call ${test.description} succeeds`, async () => {
         const { verifier } = await loadFixture(deployVerifierFixture);
 
-        expect(await verifier.verifyCallData(test.data, test.expected)).to.not.throw;
+        expect(await verifier.verifyCallData(test.target, test.data, test.expected)).to.not.throw;
       }),
     );
   });
@@ -35,7 +35,7 @@ describe("Unit tests", function () {
       it(`verify call ${test.description} fails`, async () => {
         const { verifier } = await loadFixture(deployVerifierFixture);
 
-        await expect(verifier.verifyCallData(test.data, test.expected)).to.be.revertedWith(test.error);
+        await expect(verifier.verifyCallData(test.target, test.data, test.expected)).to.be.revertedWith(test.error);
       }),
     );
   });
@@ -45,9 +45,14 @@ describe("Unit tests", function () {
       it(`verify approval ${test.description} succeeds`, async () => {
         const { verifier, socketRegistry } = await loadFixture(deployVerifierWithMockedRegistryFixture);
 
-        socketRegistry.routes.returns([test.route]);
-        expect(await verifier.verifyApprovalData(test.data, SOCKET_REGISTRY_ADDRESS, 0, test.expectedAmount)).to.not
-          .throw;
+        socketRegistry.routes.returns([test.expected.route]);
+        expect(
+          await verifier.verifyApprovalData(test.target, test.data, SOCKET_REGISTRY_ADDRESS, {
+            routeId: 0,
+            amount: test.expected.amount,
+            target: test.expected.target,
+          }),
+        ).to.not.throw;
       }),
     );
   });
@@ -57,10 +62,14 @@ describe("Unit tests", function () {
       it(`verify approve ${test.description} fails`, async () => {
         const { verifier, socketRegistry } = await loadFixture(deployVerifierWithMockedRegistryFixture);
 
-        socketRegistry.routes.returns([test.route]);
+        socketRegistry.routes.returns([test.expected.route]);
 
         await expect(
-          verifier.verifyApprovalData(test.data, SOCKET_REGISTRY_ADDRESS, 0, test.expectedAmount),
+          verifier.verifyApprovalData(test.target, test.data, SOCKET_REGISTRY_ADDRESS, {
+            routeId: 0,
+            amount: test.expected.amount,
+            target: test.expected.target,
+          }),
         ).to.be.revertedWith(test.error);
       }),
     );
