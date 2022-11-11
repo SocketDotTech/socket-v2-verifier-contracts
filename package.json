@@ -1,7 +1,7 @@
 {
   "name": "@socket.tech/socket-v2-verifier-contracts",
   "description": "Verifier contracts for Socket V2 call data",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "author": {
     "name": "rugamoto",
     "url": "https://github.com/rugamoto"
@@ -42,6 +42,7 @@
     "ethers": "^5.6.9",
     "fs-extra": "^10.1.0",
     "hardhat": "^2.10.1",
+    "hardhat-abi-exporter": "^2.10.1",
     "hardhat-gas-reporter": "^1.0.8",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3",
@@ -63,7 +64,8 @@
     "xdeployer": "^1.1.20"
   },
   "files": [
-    "/contracts"
+    "/contracts",
+    "/artifacts/abi"
   ],
   "keywords": [
     "socket",

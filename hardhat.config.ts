@@ -1,5 +1,6 @@
 import "@nomicfoundation/hardhat-toolbox";
 import { config as dotenvConfig } from "dotenv";
+import "hardhat-abi-exporter";
 import type { HardhatUserConfig } from "hardhat/config";
 import type { NetworkUserConfig } from "hardhat/types";
 import { resolve } from "path";
@@ -98,6 +99,11 @@ const config: HardhatUserConfig = {
       chainId: chainIds.hardhat,
     },
     ...liveNetworks,
+  },
+  abiExporter: {
+    runOnCompile: true,
+    flat: true,
+    path: "artifacts/abi",
   },
   xdeploy: {
     contract: "SocketV2Verifier",
